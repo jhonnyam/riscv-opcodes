@@ -4,6 +4,10 @@ PK_H := ../riscv-pk/machine/encoding.h
 ENV_H := ../riscv-tests/env/encoding.h
 OPENOCD_H := ../riscv-openocd/src/target/riscv/encoding.h
 INSTALL_HEADER_FILES := $(ISASIM_H) $(PK_H) $(ENV_H) $(OPENOCD_H)
+RV_IMAFDZicsr_Zifencei = rv_a rv_m rv_i rv_f rv_d rv_zicsr rv_zifencei rv32_c rv32_i
+RV_G = $(RV_IMAFDZicsr_Zifencei)
+RV_GC := $(RV_G) rv_c rv32_c
+BUILD_DIR := ./build
 
 default: everything
 
@@ -37,7 +41,7 @@ inst.rs:
 
 .PHONY : clean
 clean:
-	rm -f inst* priv-instr-table.tex encoding.out.h
+	rm -f inst* priv-instr-table.tex encoding.out.h rv_g
 
 .PHONY : install
 install: everything
@@ -52,3 +56,10 @@ priv-instr-table.tex: latex
 .PHONY: inst.spinalhdl
 inst.spinalhdl:
 	@./parse.py -spinalhdl $(EXTENSIONS)
+
+rv_g: $(RV_GC)
+	cat $^ > $@
+
+.PHONY: vsim.radix
+vsim.radix: $(EXTENSIONS)
+	@./parse.py -radix $(EXTENSIONS)

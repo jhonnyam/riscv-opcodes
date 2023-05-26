@@ -849,6 +849,24 @@ package riscv_instr;
 endpackage
 ''')
     sverilog_file.close()
+
+def make_radix(instr_dict):
+    names_str = ''
+    csrs_str = ''
+    for i in instr_dict:
+        names_str += f"  32'b{instr_dict[i]['encoding'].replace('-','?')} {i.upper().replace('.','_'):<18s},\n"
+    for num, name in csrs+csrs32:
+        csrs_str += f"  12'h{hex(num)[2:]} CSR_{name.upper()},\n"
+
+    radix_file = open('inst.radix.do','w')
+    radix_file.write(f'''radix define riscv_instr {{
+  32'b00000000000000000000000000000000 0x00000000,
+{names_str}}}
+radix define riscv_csrs {{
+{csrs_str}}}
+''')
+    radix_file.close()
+
 def make_c(instr_dict):
     mask_match_str = ''
     declare_insn_str = ''
@@ -1000,6 +1018,10 @@ if __name__ == "__main__":
     if '-sverilog' in sys.argv[1:]:
         make_sverilog(instr_dict)
         logging.info('inst.sverilog generated successfully')
+
+    if '-radix' in sys.argv[1:]:
+        make_radix(instr_dict)
+        logging.info('inst.radix.do generated successfully')
 
     if '-rust' in sys.argv[1:]:
         make_rust(instr_dict)
